@@ -5,6 +5,8 @@
 domain: greatlion.tech
 layout:
 - go.kubebuilder.io/v4
+plugins:
+  helm.kubebuilder.io/v1-alpha: {}
 projectName: s3-configmap-controller
 repo: github.com/greationtech/s3-configmap-controller
 resources:

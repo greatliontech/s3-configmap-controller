@@ -1,0 +1,28 @@
+{{- if .Values.rbac.enable }}
+# permissions for end users to edit s3envfiles.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+  name: s3envfile-editor-role
+rules:
+- apiGroups:
+  - config.greatlion.tech
+  resources:
+  - s3envfiles
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - config.greatlion.tech
+  resources:
+  - s3envfiles/status
+  verbs:
+  - get
+{{- end -}}

@@ -1,0 +1,3 @@
+= s3-configmap-controller
+
+kubernetes controller to sync s3 bucket with configmap

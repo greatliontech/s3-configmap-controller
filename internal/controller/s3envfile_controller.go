@@ -123,6 +123,7 @@ func (r *S3EnvFileReconciler) generateConfigMap(ctx context.Context, s3EnvFile *
 			Name:      s3EnvFile.Spec.ConfigMapName,
 			Namespace: s3EnvFile.Namespace,
 		},
+		Data: make(map[string]string),
 	}
 	for k, v := range env {
 		configMap.Data[k] = v

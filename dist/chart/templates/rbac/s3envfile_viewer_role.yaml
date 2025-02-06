@@ -1,0 +1,24 @@
+{{- if .Values.rbac.enable }}
+# permissions for end users to view s3envfiles.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+  name: s3envfile-viewer-role
+rules:
+- apiGroups:
+  - config.greatlion.tech
+  resources:
+  - s3envfiles
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - config.greatlion.tech
+  resources:
+  - s3envfiles/status
+  verbs:
+  - get
+{{- end -}}
