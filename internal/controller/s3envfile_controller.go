@@ -101,6 +101,7 @@ func (r *S3EnvFileReconciler) generateConfigMap(ctx context.Context, s3EnvFile *
 	if err != nil {
 		return nil, err
 	}
+	cfg.Region = s3EnvFile.Spec.Region
 
 	client := s3.NewFromConfig(cfg)
 

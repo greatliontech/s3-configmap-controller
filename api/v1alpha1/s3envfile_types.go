@@ -28,6 +28,9 @@ type S3EnvFileSpec struct {
 	// Key is the name of the S3 object
 	Key string `json:"key"`
 
+	// Region is the AWS region of the S3 bucket
+	Region string `json:"region"`
+
 	// ConfigMapName is the name of the ConfigMap to create
 	ConfigMapName string `json:"configMapName"`
 }
