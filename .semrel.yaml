@@ -1,0 +1,5 @@
+patchTypes:
+  - fix
+minorTypes:
+  - feat
+development: true

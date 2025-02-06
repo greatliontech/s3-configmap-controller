@@ -1,0 +1,22 @@
+name: release
+on:
+  push:
+    branches:
+      - master
+jobs:
+  goreleaser:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: semrel
+        uses: greatliontech/semrel@main
+
+      - uses: ncipollo/release-action@v1
+        if: steps.semrel.outputs.next-version != steps.semrel.outputs.current-version
+        with:
+          tag: ${{steps.semrel.outputs.next-version}}
+          token: ${{ secrets.GORELEASER_GITHUB_TOKEN }}

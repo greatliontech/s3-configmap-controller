@@ -1,8 +1,8 @@
 name: oci helm chart
 on:
-  push:
-    branches:
-      - master
+  release:
+    types:
+      - published
 jobs:
   helmoci:
     runs-on: ubuntu-latest
@@ -10,13 +10,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Change app version
+        run: |
+          yq -i '.appVersion = "${{github.event.release.tag_name}}"' dist/chart/Chart.yaml
+          yq -i 'controllerManager.container.image.tag = "${{github.event.release.tag_name}}"' dist/chart/values.yaml
+
       - name: Chart | Push
         uses: appany/helm-oci-chart-releaser@v0.3.0
         with:
           name: pbr-chart
           repository: greatliontech
-          #tag: ${{github.event.release.tag_name}}
-          tag: latest
+          tag: ${{github.event.release.tag_name}}
           path: dist/chart
           registry: ghcr.io
           registry_username: thegrumpylion

@@ -1,8 +1,8 @@
 name: build & push image
 on:
-  push:
-    branches:
-      - master
+  release:
+    types:
+      - published
 jobs:
   image:
     runs-on: ubuntu-latest
@@ -20,4 +20,4 @@ jobs:
 
       - name: Build and push
         run: |
-          make docker-build docker-push IMG="ghcr.io/greatliontech/s3-configmap-controller:latest"
+          make docker-build docker-push IMG="ghcr.io/greatliontech/s3-configmap-controller:${{github.event.release.tag_name}}"
