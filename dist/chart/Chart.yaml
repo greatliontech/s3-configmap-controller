@@ -1,5 +1,5 @@
 apiVersion: v2
-name: s3-configmap-controller
+name: s3-configmap-controller-chart
 description: A Helm chart to distribute the project s3-configmap-controller
 type: application
 version: 0.1.0
