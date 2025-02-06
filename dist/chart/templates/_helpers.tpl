@@ -18,7 +18,7 @@
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 {{- if .Chart.Version }}
-helm.sh/chart: {{ .Chart.Version | quote }}
+helm.sh/chart: {{ .Chart.Version | replace "+" "_" | quote }}
 {{- end }}
 app.kubernetes.io/name: {{ include "chart.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
