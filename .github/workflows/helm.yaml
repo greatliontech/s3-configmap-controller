@@ -13,12 +13,12 @@ jobs:
       - name: Change app version
         run: |
           yq -i '.appVersion = "${{github.event.release.tag_name}}"' dist/chart/Chart.yaml
-          yq -i 'controllerManager.container.image.tag = "${{github.event.release.tag_name}}"' dist/chart/values.yaml
+          yq -i '.controllerManager.container.image.tag = "${{github.event.release.tag_name}}"' dist/chart/values.yaml
 
       - name: Chart | Push
         uses: appany/helm-oci-chart-releaser@v0.3.0
         with:
-          name: pbr-chart
+          name: s3-configmap-controller-chart
           repository: greatliontech
           tag: ${{github.event.release.tag_name}}
           path: dist/chart
