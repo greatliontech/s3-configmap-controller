@@ -1,0 +1,9 @@
+apiVersion: config.greatlion.tech/v1alpha1
+kind: S3EnvFile
+metadata:
+  labels:
+    app.kubernetes.io/name: s3-configmap-controller
+    app.kubernetes.io/managed-by: kustomize
+  name: s3envfile-sample
+spec:
+  # TODO(user): Add fields here
