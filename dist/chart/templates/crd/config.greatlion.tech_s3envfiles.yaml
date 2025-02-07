@@ -54,13 +54,23 @@ spec:
               key:
                 description: Key is the name of the S3 object
                 type: string
+              region:
+                description: Region is the AWS region of the S3 bucket
+                type: string
             required:
             - bucket
             - configMapName
             - key
+            - region
             type: object
           status:
             description: S3EnvFileStatus defines the observed state of S3EnvFile.
+            properties:
+              lastModified:
+                format: date-time
+                type: string
+            required:
+            - lastModified
             type: object
         type: object
     served: true

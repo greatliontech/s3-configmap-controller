@@ -72,6 +72,10 @@ func (r *S3EnvFileReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		log.Error(err, "Failed to get S3EnvFile")
 		return ctrl.Result{}, err
 	}
+	// use custom resource name as default ConfigMap name if not specified
+	if s3EnvFile.Spec.ConfigMapName == "" {
+		s3EnvFile.Spec.ConfigMapName = s3EnvFile.Name
+	}
 
 	target := types.NamespacedName{
 		Name:      s3EnvFile.Spec.ConfigMapName,
@@ -89,21 +93,61 @@ func (r *S3EnvFileReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 				log.Error(err, "Failed to create ConfigMap")
 				return ctrl.Result{}, err
 			}
+			if err := r.Status().Update(ctx, s3EnvFile); err != nil {
+				log.Error(err, "Failed to update S3EnvFile status")
+				return ctrl.Result{}, err
+			}
 			return ctrl.Result{RequeueAfter: time.Minute}, nil
 		}
 	}
 
-	return ctrl.Result{}, nil
+	lm, err := r.getLastModified(ctx, s3EnvFile)
+	if err != nil {
+		log.Error(err, "Failed to get last modified time")
+		return ctrl.Result{}, err
+	}
+
+	if lm.After(s3EnvFile.Status.LastModified.Time) {
+		cm, err := r.generateConfigMap(ctx, s3EnvFile)
+		if err != nil {
+			log.Error(err, "Failed to generate ConfigMap")
+			return ctrl.Result{}, err
+		}
+		if err := r.Update(ctx, cm); err != nil {
+			log.Error(err, "Failed to update ConfigMap")
+			return ctrl.Result{}, err
+		}
+		if err := r.Status().Update(ctx, s3EnvFile); err != nil {
+			log.Error(err, "Failed to update S3EnvFile status")
+			return ctrl.Result{}, err
+		}
+	}
+
+	return ctrl.Result{RequeueAfter: time.Minute * 5}, nil
+}
+
+func (r *S3EnvFileReconciler) getLastModified(ctx context.Context, s3EnvFile *configv1alpha1.S3EnvFile) (metav1.Time, error) {
+	client, err := s3Client(ctx, s3EnvFile.Spec.Region)
+	if err != nil {
+		return metav1.Time{}, err
+	}
+
+	res, err := client.HeadObject(ctx, &s3.HeadObjectInput{
+		Bucket: aws.String(s3EnvFile.Spec.Bucket),
+		Key:    aws.String(s3EnvFile.Spec.Key),
+	})
+	if err != nil {
+		return metav1.Time{}, err
+	}
+
+	return metav1.NewTime(*res.LastModified), nil
 }
 
 func (r *S3EnvFileReconciler) generateConfigMap(ctx context.Context, s3EnvFile *configv1alpha1.S3EnvFile) (*corev1.ConfigMap, error) {
-	cfg, err := config.LoadDefaultConfig(ctx)
+	client, err := s3Client(ctx, s3EnvFile.Spec.Region)
 	if err != nil {
 		return nil, err
 	}
-	cfg.Region = s3EnvFile.Spec.Region
-
-	client := s3.NewFromConfig(cfg)
 
 	res, err := client.GetObject(ctx, &s3.GetObjectInput{
 		Bucket: aws.String(s3EnvFile.Spec.Bucket),
@@ -130,11 +174,21 @@ func (r *S3EnvFileReconciler) generateConfigMap(ctx context.Context, s3EnvFile *
 		configMap.Data[k] = v
 	}
 
+	s3EnvFile.Status.LastModified = metav1.NewTime(*res.LastModified)
+
 	if err := controllerutil.SetControllerReference(s3EnvFile, configMap, r.Scheme); err != nil {
 		return nil, err
 	}
 
 	return configMap, nil
+}
+
+func s3Client(ctx context.Context, region string) (*s3.Client, error) {
+	cfg, err := config.LoadDefaultConfig(ctx, config.WithRegion(region))
+	if err != nil {
+		return nil, err
+	}
+	return s3.NewFromConfig(cfg), nil
 }
 
 func envKeyValFromReader(r io.Reader) (map[string]string, error) {

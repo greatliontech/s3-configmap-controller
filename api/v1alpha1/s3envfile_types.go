@@ -23,12 +23,15 @@ import (
 // S3EnvFileSpec defines the desired state of S3EnvFile.
 type S3EnvFileSpec struct {
 	// Bucket is the name of the S3 bucket
+	// +kubebuilder:validation:Required
 	Bucket string `json:"bucket"`
 
 	// Key is the name of the S3 object
+	// +kubebuilder:validation:Required
 	Key string `json:"key"`
 
 	// Region is the AWS region of the S3 bucket
+	// +kubebuilder:validation:Required
 	Region string `json:"region"`
 
 	// ConfigMapName is the name of the ConfigMap to create
@@ -37,8 +40,7 @@ type S3EnvFileSpec struct {
 
 // S3EnvFileStatus defines the observed state of S3EnvFile.
 type S3EnvFileStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	LastModified metav1.Time `json:"lastModified"`
 }
 
 // +kubebuilder:object:root=true

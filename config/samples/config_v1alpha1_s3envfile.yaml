@@ -6,6 +6,7 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
   name: s3envfile-sample
 spec:
-  bucket: environments
+  bucket: candosa-environments
   key: develop/api.env
+  region: auto
   configMapName: s3envfile-sample-cm
